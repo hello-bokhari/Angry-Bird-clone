@@ -17,7 +17,7 @@ int main() {
         BeginDrawing();
         ClearBackground(RAYWHITE);
 
-        DrawLine(0, groundY, screenWidth, groundY, DARKGRAY); 
+        DrawLine(0, groundY, screenWidth, groundY, DARKGRAY);
         bird.Draw();
 
         DrawText("Drag and release to launch!", 10, 10, 20, DARKGRAY);
