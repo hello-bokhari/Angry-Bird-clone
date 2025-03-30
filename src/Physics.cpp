@@ -1,4 +1,5 @@
 #include "Physics.h"
+#include <math.h>
 
 Vector2 Physics::ApplyGravity(Vector2 velocity, float gravity, float deltaTime) {
     velocity.y += gravity * deltaTime; 

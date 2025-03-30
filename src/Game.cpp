@@ -1,4 +1,4 @@
-#include "raylib.h"
+/* #include "raylib.h"
 #include "Level.h"
 #include "Bird.h"
 #include "UI.h"
@@ -82,3 +82,4 @@ int main() {
     CloseWindow();
     return 0;
 }
+ */

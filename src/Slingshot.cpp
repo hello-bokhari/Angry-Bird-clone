@@ -1,4 +1,6 @@
 #include "Slingshot.h"
+#include <math.h>
+
 
 Slingshot::Slingshot(Vector2 anchor, float maxStretch) {
     this->anchorPoint = anchor;
