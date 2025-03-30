@@ -1,51 +1,39 @@
 #include "Bird.h"
 #include "raymath.h"
 
-// Constructor: Initializes bird properties
-Bird::Bird(Vector2 startPos, float r, float groundY) {
-    // Initial positions
-    initialPosition = startPos;
-    position = startPos;
-
-    // Zero initial velocity
-    velocity = {0, 0};
-
-    // Bird size
-    radius = r;
-
-    // Flags
-    isLaunched = false;
-    isDragging = false;
-
-    // Ground level correction
+// Constructor: Initializes bird properties and screen size
+Bird::Bird(Vector2 startPos, float r, float groundY, int screenW, int screenH) {
+    initialPosition = startPos; 
+    position = startPos;       
+    velocity = {0, 0};         
+    radius = r;                
+    isLaunched = false;        
+    isDragging = false;        
     groundLevel = groundY - r;
+    
+    screenWidth = screenW;
+    screenHeight = screenH;
 
-    // Launch time initialization
-    launchTime = 0;
-
-    // Define slingshot anchor points
+    // Slingshot anchor points
     slingAnchorA = {startPos.x - 15, groundY - 50};
     slingAnchorB = {startPos.x + 15, groundY - 50};
 }
 
 // Handles user input for dragging and launching the bird
 void Bird::HandleInput() {
-    Vector2 mousePos = GetMousePosition(); // Get current mouse position
+    Vector2 mousePos = GetMousePosition();
 
-    // Start dragging if the mouse is close enough to the bird and it's not launched
     if (IsMouseButtonDown(MOUSE_BUTTON_LEFT) && !isLaunched) {
         float distance = Vector2Distance(mousePos, initialPosition);
-        if (distance < radius * 2) { // Allow drag if within reach
+        if (distance < radius * 2) {
             isDragging = true;
         }
     }
 
-    // If dragging, update the bird's position relative to the mouse
     if (isDragging) {
         Vector2 dragVector = Vector2Subtract(mousePos, initialPosition);
         float dragDistance = Vector2Length(dragVector);
 
-        // Limit drag distance to prevent unrealistic stretching
         if (dragDistance > maxDragDistance) {
             dragVector = Vector2Scale(Vector2Normalize(dragVector), maxDragDistance);
         }
@@ -53,15 +41,16 @@ void Bird::HandleInput() {
         position = Vector2Add(initialPosition, dragVector);
     }
 
-    // If mouse is released, launch the bird
     if (isDragging && IsMouseButtonReleased(MOUSE_BUTTON_LEFT)) {
-        // Calculate launch velocity (increase scale factor to make it faster)
-        Vector2 launchVelocity = Vector2Scale(Vector2Subtract(initialPosition, position), 5.0f);
+        Vector2 launchVelocity = Vector2Scale(Vector2Subtract(initialPosition, position), launchMultiplier);
 
-        // **Reset position to the slingshot before launch**
+        // Cap velocity to prevent excessive launch power
+        float maxSpeed = 900.0f;
+        if (Vector2Length(launchVelocity) > maxSpeed) {
+            launchVelocity = Vector2Scale(Vector2Normalize(launchVelocity), maxSpeed);
+        }
+
         position = initialPosition;
-        
-        // Launch with computed velocity
         Launch(launchVelocity);
         isDragging = false;
     }
@@ -69,43 +58,65 @@ void Bird::HandleInput() {
 
 // Launches the bird with an initial velocity
 void Bird::Launch(Vector2 initialVelocity) {
-    velocity = initialVelocity; // Set velocity
-    isLaunched = true;          // Mark as launched
-    launchTime = GetTime();     // Record launch time
+    velocity = initialVelocity;
+    isLaunched = true;
 }
 
-// Updates the bird's motion based on physics
+// Updates the bird's physics
 void Bird::Update() {
     if (isLaunched) {
-        float t = GetTime() - launchTime; // Elapsed time
+        float dt = GetFrameTime();
 
-        // **Apply projectile motion equations**
-        position = Physics::ComputePosition(initialPosition, velocity, t, gravity);
-        velocity = Physics::ComputeVelocity(velocity, t, gravity);
+        // Apply gravity
+        velocity.y += gravity * dt;
 
-        // **Stop movement if the bird hits the ground**
-        if (position.y >= groundLevel) {
+        // Update position
+        position.x += velocity.x * dt;
+        position.y += velocity.y * dt;
+
+        // Bounce off ground
+        if (position.y >= groundLevel && velocity.y > 0) {
             position.y = groundLevel;
-            isLaunched = false; // Stop movement
+            velocity.y *= -bounceDamping;  
+            velocity.x *= friction;        
+
+            if (fabs(velocity.y) < 2.0f) {
+                velocity.y = 0;
+                velocity.x = 0;
+                isLaunched = false;
+            }
+        }
+
+        // Bounce off left wall
+        if (position.x - radius <= 0 && velocity.x < 0) {
+            position.x = radius;  
+            velocity.x *= -wallBounceDamping;  
+        }
+
+        // Bounce off right wall
+        if (position.x + radius >= screenWidth && velocity.x > 0) {
+            position.x = screenWidth - radius;
+            velocity.x *= -wallBounceDamping;
+        }
+
+        // Bounce off ceiling
+        if (position.y - radius <= 0 && velocity.y < 0) {
+            position.y = radius;
+            velocity.y *= -wallBounceDamping;  
         }
     }
 }
 
 // Draws the bird and UI elements
 void Bird::Draw() {
-    DrawSlingshot(); // Draw slingshot base
+    DrawSlingshot();
 
-    // Draw slingshot bands if dragging
     if (isDragging) {
         DrawLineEx(position, slingAnchorA, 5, DARKBROWN);
         DrawLineEx(position, slingAnchorB, 5, DARKBROWN);
     }
 
-    // Draw the bird
     DrawCircleV(position, radius, RED);
-
-    // Display velocity for debugging
-    DrawText(TextFormat("Velocity: (%.2f, %.2f)", velocity.x, velocity.y), 10, 40, 20, BLUE);
 }
 
 // Draws the slingshot structure

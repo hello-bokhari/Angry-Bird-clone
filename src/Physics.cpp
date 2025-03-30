@@ -1,9 +1,9 @@
 #include "Physics.h"
 
-Vector2 Physics::ComputePosition(Vector2 initialPos, Vector2 initialVel, float time, float gravity) {
+Vector2 Physics::ComputePosition(Vector2 currentPos, Vector2 velocity, float time, float gravity) {
     return {
-        initialPos.x + initialVel.x * time, 
-        initialPos.y + initialVel.y * time + 0.5f * gravity * time * time
+        currentPos.x + velocity.x * time, 
+        currentPos.y + velocity.y * time + 0.5f * gravity * time * time
     };
 }
 
