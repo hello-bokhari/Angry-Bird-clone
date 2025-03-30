@@ -1,23 +1,31 @@
 #include "Physics.h"
-#include <math.h>
 
-Vector2 Physics::ApplyGravity(Vector2 velocity, float gravity, float deltaTime) {
-    velocity.y += gravity * deltaTime; 
-    return velocity;
+
+void Physics::ApplyGravity(Vector2 &velocity, float gravity) {
+    velocity.y += gravity;
 }
 
-Vector2 Physics::ApplyDrag(Vector2 velocity, float dragFactor) {
-    velocity.x *= dragFactor;
-    velocity.y *= dragFactor;
-    return velocity;
+void Physics::ApplyAirResistance(Vector2 &velocity, float airResistance) {
+    velocity.x *= (1.0f - airResistance);
+    velocity.y *= (1.0f - airResistance);
 }
-// Circle-Rectangle Collision (Bird vs Blocks/Pigs)
-bool CheckCollisionCircleRect(Vector2 circlePos, float radius, Rectangle rect) {
-    float closestX = fmaxf(rect.x, fminf(circlePos.x, rect.x + rect.width));
-    float closestY = fmaxf(rect.y, fminf(circlePos.y, rect.y + rect.height));
 
-    float distanceX = circlePos.x - closestX;
-    float distanceY = circlePos.y - closestY;
+void Physics::ApplyGroundCollision(Vector2 &position, Vector2 &velocity, float groundLevel, float bounceFactor) {
+    if (position.y >= groundLevel) {
+        position.y = groundLevel;
+        velocity.y *= -bounceFactor;
 
-    return (distanceX * distanceX + distanceY * distanceY) <= (radius * radius);
+        if (fabs(velocity.y) < 1.5f) { 
+            velocity.y = 0; 
+        }
+    }
+}
+
+void Physics::ApplyFriction(Vector2 &velocity, float groundFriction) {
+    if (velocity.y == 0) {
+        velocity.x *= (1.0f - groundFriction);
+        if (fabs(velocity.x) < 0.1f) {
+            velocity.x = 0;
+        }
+    }
 }

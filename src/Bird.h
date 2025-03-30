@@ -1,35 +1,38 @@
 #ifndef BIRD_H
 #define BIRD_H
 
-
 #include "raylib.h"
+#include "Physics.h"
 
 class Bird {
 protected:
     Vector2 position;
-    Vector2 initialPosition; // Original position before launch
+    Vector2 initialPosition;
     Vector2 velocity;
     float radius;
     bool isLaunched;
-    bool isDragging; // To track if the bird is being dragged
+    bool isDragging;
 
-    const float gravity = 0.3f;
-    const float bounceFactor = 0.8f;
-    const float groundFriction = 0.05f;
+   // Physics parameters (Tuned for realism)
+    const float gravity = 0.5f;        // Stronger gravity for natural arc
+    const float bounceFactor = 0.4f;   // Less bounce for better realism
+    const float groundFriction = 0.08f; // More friction for quicker stop
+    const float airResistance = 0.01f; // Less air resistance for smoother flight
+    const float maxDragDistance = 75.0f; // Reduce max pullback distance
 
+    
     float groundLevel;
-    float maxDragDistance = 75.0f; // Max distance to pull back the slingshot
+    Vector2 slingAnchorA, slingAnchorB;
 
 public:
     Bird(Vector2 startPos, float r, float groundY);
 
     void Update();
     void Draw();
-    bool IsMoving() const;
-    void HandleInput(); // Handles dragging and releasing
+    void HandleInput();
     void Launch(Vector2 initialVelocity);
-
-    Vector2 GetPosition() const { return position; }
+    bool IsMoving() const;
+    void DrawSlingshot();
 };
 
 #endif

@@ -1,4 +1,4 @@
-#include "Pig.h"
+/* #include "Pig.h"
 #include "Physics.h"
 
 Pig::Pig(Vector2 position) {
@@ -21,3 +21,4 @@ void Pig::Draw() {
 bool Pig::IsDestroyed() const {
     return isDestroyed;
 }
+ */

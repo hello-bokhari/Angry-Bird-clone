@@ -8,7 +8,7 @@ int main() {
     SetTargetFPS(60);
 
     float groundY = 500;
-    Bird bird({150, groundY - 15}, 15.0f, groundY);
+    Bird bird({150, groundY - 30}, 15.0f, groundY);
 
     while (!WindowShouldClose()) {
         bird.HandleInput();
@@ -16,12 +16,12 @@ int main() {
 
         BeginDrawing();
         ClearBackground(RAYWHITE);
-        
-        DrawLine(0, groundY, screenWidth, groundY, DARKGRAY); // Draw ground
+
+        DrawLine(0, groundY, screenWidth, groundY, DARKGRAY); 
         bird.Draw();
 
         DrawText("Drag and release to launch!", 10, 10, 20, DARKGRAY);
-        
+
         EndDrawing();
     }
 

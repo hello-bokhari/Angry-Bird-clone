@@ -2,11 +2,14 @@
 #define PHYSICS_H
 
 #include "raylib.h"
+#include <math.h>
 
-struct Physics {
-    static Vector2 ApplyGravity(Vector2 velocity, float gravity, float deltaTime);
-    static Vector2 ApplyDrag(Vector2 velocity, float dragFactor);
+class Physics {
+public:
+    static void ApplyGravity(Vector2 &velocity, float gravity);
+    static void ApplyAirResistance(Vector2 &velocity, float airResistance);
+    static void ApplyGroundCollision(Vector2 &position, Vector2 &velocity, float groundLevel, float bounceFactor);
+    static void ApplyFriction(Vector2 &velocity, float groundFriction);
 };
 
-bool CheckCollisionCircleRect(Vector2 circlePos, float radius, Rectangle rect);
 #endif
